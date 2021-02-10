@@ -14,31 +14,37 @@ router.get("/", function (req, res) {
 router.post("/addScore", async function (req, res) {
     try {
 
-        const checkUser = await (await db.Profile.findOne({_id: req.body.id, scores: {$elemMatch: {$gte: req.body.score}}}));
+        const checkProfile = await (await db.Profile.findOne({_id: req.body.id, scores: {$elemMatch: {$gte: req.body.score}}}));
 
-        if(checkUser) {
+        if(checkProfile) {
             console.log("checked");
-            checkUser.scores.push(req.body.score);
-            checkUser.scores.sort((a, b) => a - b);
-            checkUser.save()
-            return res.status(200).json({status: 200, message:"NO highscore", checkUser});
+            checkProfile.scores.push(req.body.score);
+            checkProfile.scores.sort((a, b) => b - a);
+            checkProfile.save()
+            return res.status(200).json({status: 200, message:"NO highscore", checkProfile});
         }
 
-        const updatedUser = await db.Profile.findByIdAndUpdate(req.body.id, {
+        const updatedProfile = await db.Profile.findByIdAndUpdate(req.body.id, {
             $set: {highscore: req.body.score}, 
             $push: {
                 scores: {
                     $each: [req.body.score], 
-                    $sort: {scores: 1}
+                    $sort: {scores: -1}
                 }
             }
         }, {new: true});
 
-        res.status(200).json({status: 200, updatedUser});
+        return res.status(200).json({status: 200, updatedProfile});
         
     } catch (error) { 
         res.status(500).json({status: 500, message:"Something went wrong", error});
     }
+
+});
+
+router.put("./edit", async function (req, res) {
+    
+    const updatedProfile = await db.Profile.findByIdAndUpdate(req.body.id, req.body, {new: true})
 
 })
 
