@@ -17,6 +17,8 @@ const PORT = 4000;
 
 app.use("/", controllers.auth);
 
+app.use("/profile", controllers.profile);
+
 // app.get('/', (req, res) => res.send('Hello World!'));
 
 /* ===== SERVER LISTENER ===== */

@@ -49,7 +49,7 @@ router.post("/register", async function (req, res) {
 // POST LOGIN ROUTE
 router.post("/login", async function (req, res) {
     try {
-        const foundUser = await db.User.findOne({email: req.body.email});
+        const foundUser = await db.User.findOne({email: req.body.email}).populate("profile");
 
         if(!foundUser) {
             return res.send({field: "email", message: "Email/Password incorrect."})
