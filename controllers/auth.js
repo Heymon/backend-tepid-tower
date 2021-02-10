@@ -25,7 +25,7 @@ router.post("/register", async function (req, res) {
         // console.log(checkUsername);
 
         if(checkUsername) {
-            return res.send({field: "username", message: "This username is already being used."})
+            return res.send({field: "username", message: "This username is already being used."});
         }
 
         const createdProfile = await db.Profile.create({

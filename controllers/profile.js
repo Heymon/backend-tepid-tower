@@ -11,6 +11,7 @@ router.get("/", function (req, res) {
     res.send('Routes work');
 });
 
+// POST  Add score to score list IN PROFILE AND chek for highscore
 router.post("/addScore", async function (req, res) {
     try {
 
@@ -42,19 +43,55 @@ router.post("/addScore", async function (req, res) {
 
 });
 
-router.put("/edit", async function (req, res) {
+//PUT EDIT PROFILE
+router.put("/edit", async function (req, res) { 
+    try {
+        const checkUsername = await (await db.Profile.findOne({username: req.body.username}));
+
+        if (!checkUsername) {
+            const updatedProfile = await db.Profile.findByIdAndUpdate(
+                req.body.id, 
+                {
+                    username: req.body.username,
+                    country: req.body.country
+                }, {new: true});
+            
+            
+            return res.status(200).json({status: 200, updatedProfile});
+            
+        }
+
+        return res.send({field: "username", message: "This username is already being used."});
+
+    } catch (error) {
+        res.status(500).json({status: 500, message:"Something went wrong", error});
+    }
+
+
+})
+
+// POST  Add user to friends list IN PROFILE
+router.post("/addFriend", async function (req, res) {
     
     try {
 
-        const updatedProfile = await db.Profile.findByIdAndUpdate(
-            req.body.id, 
-            {
-                username: req.body.username,
-                country: req.body.country
-            }, {new: true});
+        const foundUser = await db.User.findOne({email: req.body.email});
+
+        if (foundUser) {
+            await db.Profile.findByIdAndUpdate(
+                req.body.id, 
+                {
+                    $push:
+                        {
+                            friends: foundUser._id
+                        }
+                }, {new: true});
+
+            return res.status(200).json({status: 200, message:"Friend was added.",foundUser});
+        }
         
+        res.status(500).json({status: 500, field: "email", message:"User doesnt exist."});
         
-        return res.status(200).json({status: 200, updatedProfile});
     } catch (error) {
         res.status(500).json({status: 500, message:"Something went wrong", error});
     }
