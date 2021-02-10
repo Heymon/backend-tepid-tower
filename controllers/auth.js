@@ -6,10 +6,12 @@ const jwt = require("jsonwebtoken");
 
 
 /* =====AUTH ROUTES======= */
+
 router.get("/register", function (req, res) {
     res.send('Routes work');
 });
 
+// POST REGISTRATION ROUTE
 router.post("/register", async function (req, res) {
     try {
         const checkEmail = await db.User.findOne({email: req.body.email});
@@ -43,4 +45,29 @@ router.post("/register", async function (req, res) {
     }
 
 });
+
+// POST LOGIN ROUTE
+router.post("/login", async function (req, res) {
+    try {
+        const foundUser = await db.User.findOne({email: req.body.email});
+
+        if(!foundUser) {
+            return res.send({field: "email", message: "Email/Password incorrect."})
+        }
+        
+        const didMatch = await bcrypt.compare(req.body.password, foundUser.password);
+
+        if (!didMatch) {
+
+            return res.status(400).json({field: "email", message: "Email/Password incorrect."});
+        } else {
+            //TODO add jwt
+
+            return res.status(200).json({status: 200, message: "Sucess", foundUser});
+        }
+    } catch (error) {
+        return res.status(400).json({field: "email", message: "Email/Password incorrect."});
+    }    
+})
+
 module.exports = router;
