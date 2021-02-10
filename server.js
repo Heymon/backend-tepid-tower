@@ -19,6 +19,8 @@ app.use("/", controllers.auth);
 
 app.use("/profile", controllers.profile);
 
+app.use("/user", controllers.user);
+
 // app.get('/', (req, res) => res.send('Hello World!'));
 
 /* ===== SERVER LISTENER ===== */
