@@ -1,5 +1,6 @@
 /* ===== EXTERNAL MODULES ===== */
 const express = require("express");
+const cors = require("cors");
 
 /* ===== INTERNAL MODULES ===== */
 const controllers = require("./controllers");
@@ -8,6 +9,7 @@ const controllers = require("./controllers");
 const app = express();
 
 /* =====MIDDLEWARE==== */
+app.use(cors());//cors configuration
 app.use(express.json());//-JSON parsing
 
 /* ===== CONFIGURATIONS ===== */
