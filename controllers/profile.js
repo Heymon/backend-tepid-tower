@@ -42,9 +42,23 @@ router.post("/addScore", async function (req, res) {
 
 });
 
-router.put("./edit", async function (req, res) {
+router.put("/edit", async function (req, res) {
     
-    const updatedProfile = await db.Profile.findByIdAndUpdate(req.body.id, req.body, {new: true})
+    try {
+
+        const updatedProfile = await db.Profile.findByIdAndUpdate(
+            req.body.id, 
+            {
+                username: req.body.username,
+                country: req.body.country
+            }, {new: true});
+        
+        
+        return res.status(200).json({status: 200, updatedProfile});
+    } catch (error) {
+        res.status(500).json({status: 500, message:"Something went wrong", error});
+    }
+
 
 })
 
