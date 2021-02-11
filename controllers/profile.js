@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const db = require("../models");
 const jwt = require("jsonwebtoken");
 
+const authRequired = require("../middleware/authRequired");
 
 /* =====PROFILE ROUTES======= */
 
@@ -44,20 +45,25 @@ router.post("/addScore", async function (req, res) {
 });
 
 //PUT EDIT PROFILE
-router.put("/edit", async function (req, res) { 
+router.put("/edit", authRequired, async function (req, res) { 
     try {
-        const checkUsername = await (await db.Profile.findOne({username: req.body.username}));
-
+        
+        const checkUsername = await db.Profile.findOne({username: req.body.username});
+        
+        
         if (!checkUsername) {
-            const updatedProfile = await db.Profile.findByIdAndUpdate(
-                req.body.id, 
+            let curUser = await db.User.findById(req.currentUser);
+
+            await db.Profile.findByIdAndUpdate(
+                curUser.profile, 
                 {
                     username: req.body.username,
                     country: req.body.country
                 }, {new: true});
             
-            
-            return res.status(200).json({status: 200, updatedProfile});
+            curUser = await db.User.findById(req.currentUser).populate("profile");
+
+            return res.status(200).json({status: 200, updatedUser: curUser});
             
         }
 
