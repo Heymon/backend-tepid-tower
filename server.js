@@ -13,7 +13,8 @@ app.use(cors());//cors configuration
 app.use(express.json());//-JSON parsing
 
 /* ===== CONFIGURATIONS ===== */
-const PORT = 4000;
+require("dotenv").config();
+const PORT = process.env.PORT || 4000;
 
 /* ===== CONTROLLERS ===== */
 
