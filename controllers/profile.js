@@ -8,8 +8,16 @@ const authRequired = require("../middleware/authRequired");
 
 /* =====PROFILE ROUTES======= */
 
-router.get("/", function (req, res) {
-    res.send('Routes work');
+router.get("/", authRequired, async function (req, res) {
+    try {   
+            console.log(req.currentUser);
+            const curUser = await db.User.findById(req.currentUser).populate("profile");
+
+            return res.status(200).json({status: 200, curUser});
+       
+    } catch (error) {
+        res.status(500).json({status: 500, message:"Something went wrong", error});
+    }
 });
 
 // POST  Add score to score list IN PROFILE AND chek for highscore
@@ -47,7 +55,7 @@ router.post("/addScore", async function (req, res) {
 //PUT EDIT PROFILE
 router.put("/edit", authRequired, async function (req, res) { 
     try {
-        
+        // TODO bug where same username think it is taken
         const checkUsername = await db.Profile.findOne({username: req.body.username});
         
         
@@ -74,7 +82,7 @@ router.put("/edit", authRequired, async function (req, res) {
     }
 
 
-})
+});
 
 // POST  Add user to friends list IN PROFILE
 router.post("/addFriend", async function (req, res) {
@@ -103,7 +111,7 @@ router.post("/addFriend", async function (req, res) {
     }
 
 
-})
+});
 
 
 module.exports = router;
