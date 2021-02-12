@@ -21,20 +21,28 @@ router.get("/", authRequired, async function (req, res) {
 });
 
 // POST  Add score to score list IN PROFILE AND chek for highscore
-router.post("/addScore", async function (req, res) {
+router.post("/addScore", authRequired, async function (req, res) {
     try {
 
-        const checkProfile = await (await db.Profile.findOne({_id: req.body.id, scores: {$elemMatch: {$gte: req.body.score}}}));
+        console.log("chegou?");
+        console.log(req.body);
+
+        const curUser = await db.User.findById(req.currentUser).populate("profile"); 
+        const checkProfile = await db.Profile.findOne(
+            {
+                _id: curUser.profile, 
+                scores: {$elemMatch: {$gte: req.body.score}}
+            });
 
         if(checkProfile) {
             console.log("checked");
             checkProfile.scores.push(req.body.score);
             checkProfile.scores.sort((a, b) => b - a);
             checkProfile.save()
-            return res.status(200).json({status: 200, message:"NO highscore", checkProfile});
+            return res.status(200).json({status: 200, message:"score", updatedProfile: checkProfile});
         }
-
-        const updatedProfile = await db.Profile.findByIdAndUpdate(req.body.id, {
+        
+        const updatedProfile = await db.Profile.findByIdAndUpdate(curUser.profile, {
             $set: {highscore: req.body.score}, 
             $push: {
                 scores: {
@@ -43,8 +51,8 @@ router.post("/addScore", async function (req, res) {
                 }
             }
         }, {new: true});
-
-        return res.status(200).json({status: 200, updatedProfile});
+                
+        return res.status(200).json({status: 200, message:"highscore", updatedProfile});
         
     } catch (error) { 
         res.status(500).json({status: 500, message:"Something went wrong", error});
