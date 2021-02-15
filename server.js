@@ -11,12 +11,17 @@ const app = express();
 /* =====MIDDLEWARE==== */
 app.use(cors());//cors configuration
 app.use(express.json());//-JSON parsing
+app.use(express.static(__dirname + "/build"));
 
 /* ===== CONFIGURATIONS ===== */
 require("dotenv").config();
 const PORT = process.env.PORT || 4000;
 
 /* ===== CONTROLLERS ===== */
+
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/build' + '/index.html');
+  });
 
 app.use("/", controllers.auth);
 
