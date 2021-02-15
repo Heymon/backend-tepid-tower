@@ -11,7 +11,17 @@ const userSchema = new mongoose.Schema({
         password: {type: String, required: true, minLength: 8},
         profile: {type: mongoose.Schema.Types.ObjectId, ref: "Profile"}
     },
-    {timestamps: true})
+    {timestamps: true});
+
+    userSchema.set("toJSON", {
+        // doc is the document that the database is returning
+        // ret is the return in js data
+        // opt is propably different obj options
+        transform: (doc, ret, opt) => {// so  when transforming in to json
+          delete ret["password"];//deletes the password from the data so it is not visible
+          return ret;
+        },
+      });
 
 const User = mongoose.model("User", userSchema);
 
