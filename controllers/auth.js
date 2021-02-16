@@ -61,7 +61,6 @@ router.post("/login", async function (req, res) {
 
             return res.status(400).json({field: "email", message: "Email/Password incorrect."});
         } else {
-            //TODO add jwt
             const signedJwt = await jwt.sign(
                 {
                     _id: foundUser._id
