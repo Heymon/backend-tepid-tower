@@ -93,26 +93,37 @@ router.put("/edit", authRequired, async function (req, res) {
 });
 
 // POST  Add user to friends list IN PROFILE
-router.post("/addFriend", async function (req, res) {
-    
+router.post("/addFriend", authRequired, async function (req, res) {
     try {
 
-        const foundUser = await db.User.findOne({email: req.body.email});
+        const foundFriend = await db.User.findOne({email: req.body.friendEmail});
+        
+        if (foundFriend) {
 
-        if (foundUser) {
+            const curUser = await db.User.findById(req.currentUser)
+            const checkProfile = await db.Profile.findOne(
+                {
+                    _id: curUser.profile, 
+                    friends: {$elemMatch: {$eq: foundFriend._id}}
+                });
+            console.log(checkProfile);
+            if(checkProfile){
+                return res.status(302).json({status: 302, field: "email", message:"User already your friend."});
+            }
+
             await db.Profile.findByIdAndUpdate(
-                req.body.id, 
+                curUser.profile, 
                 {
                     $push:
                         {
-                            friends: foundUser._id
+                            friends: foundFriend._id
                         }
                 }, {new: true});
 
-            return res.status(200).json({status: 200, message:"Friend was added.",foundUser});
+            return res.status(200).json({status: 200, field: "email",message:"Friend was added.",foundFriend});
         }
         
-        res.status(500).json({status: 500, field: "email", message:"User doesnt exist."});
+        res.status(404).json({status: 404, field: "email", message:"User doesnt exist."});
         
     } catch (error) {
         res.status(500).json({status: 500, message:"Something went wrong", error});
