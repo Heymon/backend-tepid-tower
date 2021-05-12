@@ -17,7 +17,7 @@ router.post("/register", async function (req, res) {
         const checkEmail = await db.User.findOne({email: req.body.email});
 
         if(checkEmail) {
-            return res.send({field: "email", message: "An account with this email already exists."})
+            return res.send({type:"error", field: "email", message: "An account with this email already exists."})
         }
 
         const checkUsername = await db.Profile.findOne({username: req.body.username});
@@ -25,7 +25,7 @@ router.post("/register", async function (req, res) {
         // console.log(checkUsername);
 
         if(checkUsername) {
-            return res.send({field: "username", message: "This username is already being used."});
+            return res.send({type:"error", field: "username", message: "This username is already being used."});
         }
 
         const createdProfile = await db.Profile.create({
@@ -38,7 +38,7 @@ router.post("/register", async function (req, res) {
 
         const createdUser = await db.User.create( {email: req.body.email, password: hash, profile: createdProfile._id});
 
-        return res.status(201).json({status: 201, type: "sucessfull", field: "submit", message: "User was successfully created. Please Login", createdUser, createdProfile});
+        return res.status(201).json({status: 201, type: "sucessful", field: "submit", message: "User was successfully created. Please Login.", createdUser, createdProfile});
 
     } catch(error) {
         return res.status(500).json({status: 500, message: "Something went wrong.", error})
@@ -52,14 +52,14 @@ router.post("/login", async function (req, res) {
         const foundUser = await db.User.findOne({email: req.body.email}).populate("profile");
 
         if(!foundUser) {
-            return res.send({field: "email", message: "Email/Password incorrect."})
+            return res.send({type:"error", field: "email", message: "Email/Password incorrect."})
         }
         
         const didMatch = await bcrypt.compare(req.body.password, foundUser.password);
 
         if (!didMatch) {
 
-            return res.status(400).json({field: "email", message: "Email/Password incorrect."});
+            return res.status(400).json({type:"error", field: "email", message: "Email/Password incorrect."});
         } else {
             const signedJwt = await jwt.sign(
                 {
@@ -74,7 +74,7 @@ router.post("/login", async function (req, res) {
             return res.status(200).json({status: 200, message: "Sucess", foundUser, signedJwt});
         }
     } catch (error) {
-        return res.status(400).json({field: "email", message: "Email/Password incorrect."});
+        return res.status(400).json({type:"error", field: "email", message: "Email/Password incorrect."});
     }    
 })
 

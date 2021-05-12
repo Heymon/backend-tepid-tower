@@ -63,30 +63,37 @@ router.post("/addScore", authRequired, async function (req, res) {
 //PUT EDIT PROFILE
 router.put("/edit", authRequired, async function (req, res) { 
     try {
-        // TODO bug where same username think it is taken
         const checkUsername = await db.Profile.findOne({username: req.body.username});
         
-        
-        if (!checkUsername) {
-            let curUser = await db.User.findById(req.currentUser);
+        let curUser = await db.User.findById(req.currentUser).populate("profile");
+        // console.log(checkUsername.username);
+        // console.log(curUser);
 
-            await db.Profile.findByIdAndUpdate(
-                curUser.profile, 
-                {
-                    username: req.body.username,
-                    country: req.body.country
-                }, {new: true});
+        if (!checkUsername || checkUsername.username === curUser.profile.username) {
+
+            // await db.Profile.findByIdAndUpdate(
+            //     curUser.profile, 
+            //     {
+            //         username: req.body.username,
+            //         country: req.body.country
+            //     }, {new: true});
+            // curUser = await db.User.findById(req.currentUser).populate("profile");
             
-            curUser = await db.User.findById(req.currentUser).populate("profile");
+            curUser.profile.username = req.body.username;    
+            curUser.profile.country = req.body.country;   
+            return await curUser.save().then(savedUser=> {
+                // console.log(curUser);they are both the same
+                // console.log(savedUser);
+                return res.status(200).json({status: 200, type:"successful", field: "submit", message:"Profile has been successfully updated.", updatedUser: savedUser});
+            }) 
 
-            return res.status(200).json({status: 200, updatedUser: curUser});
             
         }
 
-        return res.send({field: "username", message: "This username is already being used."});
+        return res.send({type:"error", field:"username", message:"This username is already being used."});
 
     } catch (error) {
-        res.status(500).json({status: 500, message:"Something went wrong", error});
+        res.status(500).json({status: 500, type:"error", field: "submit", message:"Something went wrong", error});
     }
 
 
@@ -108,7 +115,7 @@ router.post("/addFriend", authRequired, async function (req, res) {
                 });
             console.log(checkProfile);
             if(checkProfile){
-                return res.status(302).json({status: 302, field: "email", message:"User already your friend."});
+                return res.status(302).json({status: 302, type:"error", field: "email", message:"User already your friend."});
             }
 
             await db.Profile.findByIdAndUpdate(
@@ -120,10 +127,10 @@ router.post("/addFriend", authRequired, async function (req, res) {
                         }
                 }, {new: true});
 
-            return res.status(200).json({status: 200, field: "email",message:"Friend was added.",foundFriend});
+            return res.status(200).json({status: 200, type:"successful", field: "email",message:"Friend was added.",foundFriend});
         }
         
-        res.status(404).json({status: 404, field: "email", message:"User doesnt exist."});
+        res.status(404).json({status: 404, type:"error", field: "email", message:"User doesnt exist."});
         
     } catch (error) {
         res.status(500).json({status: 500, message:"Something went wrong", error});
