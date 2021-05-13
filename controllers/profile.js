@@ -51,8 +51,9 @@ router.post("/addScore", authRequired, async function (req, res) {
                 }
             }
         }, {new: true});
-                
-        return res.status(200).json({status: 200, message:"highscore", updatedProfile});
+
+        const updatedUser = await db.User.findById(req.currentUser).populate("profile");        
+        return res.status(200).json({status: 200, message:"highscore", updatedUser});
         
     } catch (error) { 
         res.status(500).json({status: 500, message:"Something went wrong", error});
